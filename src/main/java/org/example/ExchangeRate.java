@@ -1,10 +1,11 @@
 package org.example;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
+
+// Класс валюты
 class Currency {
     String currencyCode;
     String currencySymbol;
@@ -20,33 +21,26 @@ class Currency {
         return currencyCode;
     }
 
-    public void setCurrencyCode(String currencyCode) {
-        this.currencyCode = currencyCode;
-    }
 
     public String getCurrencySymbol() {
         return currencySymbol;
     }
 
-    public void setCurrencySymbol(String currencySymbol) {
-        this.currencySymbol = currencySymbol;
-    }
 
     public String getCurrencyCountry() {
         return currencyCountry;
     }
 
-    public void setCurrencyCountry(String currencyCountry) {
-        this.currencyCountry = currencyCountry;
-    }
 }
 
+// Основной класс для конвертации валют
 class CurrencyConverter {
 
     Currency[] currencies;
     HashMap<Currency, HashMap<Currency, Double>> exchangeRates;
     Scanner scanner = new Scanner(System.in);
 
+    //  Инициализация курсов валют
     public void initRates() {
 
         exchangeRates = new HashMap<>();
@@ -59,6 +53,7 @@ class CurrencyConverter {
                 new Currency("RUB", "₽", "Russia")
         };
 
+//      Матрица курсов
         double[][] rates = {
                 //USD,  EUR,  GBP,   JPY,  RUB
                 {1.00, 0.85, 0.73, 146.82, 83},    // USD -> другие
@@ -68,32 +63,34 @@ class CurrencyConverter {
                 {0.012, 0.01, 0.0089, 1.77, 1.00}  // RUB -> другие
         };
 
+//      Заполнение HashMap курсами
         for (int i = 0; i < currencies.length; i++) {
             Currency fromCurrency = currencies[i];
             HashMap<Currency, Double> targetRate = new HashMap<>();
 
             for (int j = 0; j < currencies.length; j++) {
-                if (i != j) {
-                    Currency targetCurrency = currencies[j];
-                    targetRate.put(targetCurrency, rates[i][j]);
-                }
+                Currency targetCurrency = currencies[j];
+                targetRate.put(targetCurrency, rates[i][j]);
             }
             exchangeRates.put(fromCurrency, targetRate);
         }
 
     }
 
+    //  Метод для показа курсов для всех валют
     public void showRates(HashMap<Currency, HashMap<Currency, Double>> map) {
         for (Map.Entry<Currency, HashMap<Currency, Double>> entry : map.entrySet()) {
 
             for (Map.Entry<Currency, Double> entry1 : entry.getValue().entrySet()) {
 
-                System.out.println("1 " + entry.getKey().getCurrencyCode() + " -->  1 " + entry1.getKey().getCurrencyCode() + " = " + entry1.getValue());
+                System.out.println("1 " + entry.getKey().getCurrencyCode() + " (" + entry.getKey().getCurrencyCountry() + ") " + " -->  1 "
+                        + entry1.getKey().getCurrencyCode() + " (" + entry1.getKey().getCurrencyCountry() + ") " + " = " + entry1.getValue());
             }
             System.out.println();
         }
     }
 
+    //  Метод для показа курсов для конкретной валюты
     public void showRates(HashMap<Currency, HashMap<Currency, Double>> map, String code) {
 
         for (Map.Entry<Currency, HashMap<Currency, Double>> entry : map.entrySet()) {
@@ -101,7 +98,8 @@ class CurrencyConverter {
             if (entry.getKey().getCurrencyCode().equalsIgnoreCase(code)) {
                 for (Map.Entry<Currency, Double> entry1 : entry.getValue().entrySet()) {
 
-                    System.out.println("1 " + entry.getKey().getCurrencyCode() + " -->  1 " + entry1.getKey().getCurrencyCode() + " = " + entry1.getValue());
+                    System.out.println("1 " + entry.getKey().getCurrencyCode() + " (" + entry.getKey().getCurrencyCountry() + ") " + " -->  1 "
+                            + entry1.getKey().getCurrencyCode() + " (" + entry1.getKey().getCurrencyCountry() + ") " + " = " + entry1.getValue());
                 }
                 System.out.println();
             }
@@ -110,12 +108,69 @@ class CurrencyConverter {
 
     }
 
+    //  Метод для вывода существующих валют
     public void showCurrencies(Currency[] currencies) {
 
         for (Currency currency : currencies) {
             System.out.println(currency.getCurrencyCountry() + " " + currency.getCurrencyCode() + " " + currency.getCurrencySymbol());
         }
 
+    }
+
+    //  Проверка на существование валюты
+    public boolean isCurrencyExists(Currency[] currencies, String currencyCode) {
+        for (Currency currency : currencies) {
+            if (currency.getCurrencyCode().equalsIgnoreCase(currencyCode)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    //  Метод для конвертации валют
+    public double convertCurrency(String fromCurrencyCode, String targetCurrencyCode, Double amount) {
+        Currency fromCurrency = getCurrencyByCode(fromCurrencyCode);
+        Currency targetCurrency = getCurrencyByCode(targetCurrencyCode);
+
+        HashMap<Currency, Double> rates = exchangeRates.get(fromCurrency);
+        Double rate = rates.get(targetCurrency);
+        return amount * rate;
+    }
+
+    //  Метод для конвертации получения валюты по ее коду
+    public Currency getCurrencyByCode(String code) {
+        for (Currency currency : exchangeRates.keySet()) {
+            if (currency.getCurrencyCode().equalsIgnoreCase(code)) {
+                return currency;
+            }
+        }
+        return null;
+    }
+
+    //  Метод для получения валидных кодов валют
+    public String getValidCurrencyCode(String message) {
+        while (true) {
+
+            System.out.println(message);
+            String code = scanner.nextLine();
+            if (isCurrencyExists(currencies, code) || code.isEmpty()) {
+                return code;
+            }
+            System.out.println("Неверный код валюты! Доступные: USD, EUR, GBR, JPY, RUB");
+        }
+    }
+
+    //  Метод для получения валидной суммы конвертации
+    public Double getValidAmount() {
+        while (true) {
+            System.out.print("Введите сумму, которую хотите конвертировать: ");
+            String stringAmount = scanner.nextLine();
+            try {
+                return Double.parseDouble(stringAmount);
+            } catch (NumberFormatException e) {
+                System.out.println("Ошибка: введите корректное число!");
+            }
+        }
     }
 
     public void action() {
@@ -127,7 +182,6 @@ class CurrencyConverter {
                     "1 - Посмотреть валюты доступные для конвертации\n" +
                             "2 - Посмотреть курсы валют\n" +
                             "3 - Конвертация валют\n" +
-                            "4 - Добавить свою валюту\n" +
                             "0 - Выход из программы"
             );
 
@@ -140,13 +194,11 @@ class CurrencyConverter {
                 }
 
                 case 2: {
-                    System.out.println("Напишите код валюты для которой хотите посмотреть курсы (оставьте поле ввода пустым если хотите посмотреть для всех валют): ");
-                    String userCurrencyCode = scanner.next();
-
-                    while (!Arrays.stream(currencies).anyMatch(userCurrencyCode.toUpperCase()::equals)) {
-                        System.out.println("Такой валюты не существует!");
-                        System.out.println("Напишите код валюты для которой хотите посмотреть курсы (оставьте поле ввода пустым если хотите посмотреть для всех валют): ");
-                        userCurrencyCode = scanner.next();
+                    scanner.nextLine();
+                    String userCurrencyCode = getValidCurrencyCode("Введите код валюты (USD, EUR, RUB, GBR, JPY), чтобы посмотреть ее курсы или оставьте пустым, чтобы увидеть все курсы");
+                    if (userCurrencyCode.isEmpty()) {
+                        showRates(exchangeRates);
+                        break;
                     }
 
                     showRates(exchangeRates, userCurrencyCode);
@@ -155,10 +207,16 @@ class CurrencyConverter {
                 }
 
                 case 3: {
-                    break;
-                }
+                    scanner.nextLine();
+                    String fromCurrencyCode = getValidCurrencyCode("Напишите код валюты (USD, EUR, RUB, GBR, JPY), которую хотите перевести: ");
 
-                case 4: {
+                    String targetCurrencyCode = getValidCurrencyCode("Напишите код валюты (USD, EUR, RUB, GBR, JPY), в которую хотите перевести: ");
+
+                    Double amount = getValidAmount();
+                    System.out.println(fromCurrencyCode + "   " + targetCurrencyCode + "   " + amount);
+                    double convertedAmount = convertCurrency(fromCurrencyCode, targetCurrencyCode, amount);
+                    System.out.println(amount + " " + fromCurrencyCode + " --> " + convertedAmount + " " + targetCurrencyCode);
+
                     break;
                 }
 
