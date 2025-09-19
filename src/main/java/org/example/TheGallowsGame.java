@@ -103,7 +103,7 @@ class GameState {
     private final Scanner scanner = new Scanner(System.in);
 
     // Инициализирует новую игру
-    public void initGame() {
+    private void initGame() {
         randomWord = wordRepository.getRandomWord().toLowerCase();
         secretWord = new char[randomWord.length()];
         Arrays.fill(secretWord, '*');
@@ -112,7 +112,7 @@ class GameState {
     }
 
     // Запрашивает у пользователя букву с проверками
-    public String getLetter() {
+    private String getLetter() {
         while (true) {
             System.out.println("Введите одну русскую букву:");
             String letter = scanner.nextLine().toLowerCase();
@@ -137,13 +137,13 @@ class GameState {
     }
 
     // Проверяет, является ли введенный символ русской буквой
-    public boolean isRussianLetter(String letter) {
+    private boolean isRussianLetter(String letter) {
         String russianAlphabet = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
         return russianAlphabet.contains(letter);
     }
 
     // Выводит состояние слова
-    public void showWord(char[] array) {
+    private void showWord(char[] array) {
         System.out.print("Слово: ");
         for (char c : array) {
             System.out.print(c + " ");
@@ -152,7 +152,7 @@ class GameState {
     }
 
     // Заменяет * на угаданную букву
-    public char[] setLetterInsteadPass(String exampleLetter, char[] array, String word) {
+    private char[] setLetterInsteadPass(String exampleLetter, char[] array, String word) {
         for (int i = 0; i < word.length(); i++) {
             if (word.charAt(i) == exampleLetter.charAt(0)) {
                 array[i] = exampleLetter.charAt(0);
@@ -162,7 +162,7 @@ class GameState {
     }
 
     // Проверяет, угадано ли слово полностью
-    public boolean checkWin(char[] array) {
+    private boolean checkWin(char[] array) {
         for (char c : array) {
             if (c == '*') {
                 return false;
@@ -172,7 +172,7 @@ class GameState {
     }
 
     // Выводит список использованных букв
-    public void showEnteredLetters() {
+    private void showEnteredLetters() {
         System.out.println("Использованные буквы: " + enteredLetters);
     }
 

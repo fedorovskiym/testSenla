@@ -30,7 +30,7 @@ class GeneratorOptions {
     }
 
     // Перемешивает символы в строке
-    public String shuffleString(String string) {
+    private String shuffleString(String string) {
         List<String> letters = Arrays.asList(string.split(""));
         Collections.shuffle(letters);
         String shuffled = "";
